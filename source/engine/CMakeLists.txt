@@ -8,6 +8,7 @@ target_sources(${Target}
         ${PublicHeaders}
     PRIVATE
         window.cpp
+        renderer.cpp
 )
 
 target_include_directories(${Target}
@@ -20,6 +21,7 @@ add_compile_definitions(VULKAN_HPP_NO_STRUCT_CONSTRUCTORS)
 target_link_libraries(${Target}
     glfw
     glad
+    lodepng
 )
 
 set_target_properties(${Target} PROPERTIES FOLDER Core)
