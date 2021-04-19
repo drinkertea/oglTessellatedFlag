@@ -7,6 +7,7 @@ int main()
     Engine::Renderer renderer;
 
     window.EventLoop([&] {
+        renderer.Render();
     });
     return 0;
 }

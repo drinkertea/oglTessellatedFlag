@@ -22,5 +22,5 @@ project(lodepng)
 set(LP_DIR "lodepng")
 
 add_library(lodepng ${LP_DIR}/lodepng.h ${LP_DIR}/lodepng.cpp)
-target_include_directories(lodepng PUBLIC ${GLAD_DIR})
+target_include_directories(lodepng PUBLIC ${LP_DIR})
 set_target_properties(lodepng PROPERTIES FOLDER External)
