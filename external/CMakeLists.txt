@@ -8,3 +8,11 @@ add_subdirectory(glfw)
 get_target_property(GLFW_FOLDER glfw FOLDER)
 set_target_properties(glfw PROPERTIES FOLDER External/${GLFW_FOLDER})
 set_target_properties(uninstall PROPERTIES FOLDER External/${GLFW_FOLDER})
+
+# glad
+project(glad)
+set(GLAD_DIR "glad")
+
+add_library(glad ${GLAD_DIR}/glad/glad.h ${GLAD_DIR}/glad.c)
+target_include_directories(glad PUBLIC ${GLAD_DIR})
+set_target_properties(glad PROPERTIES FOLDER External/${GLFW_FOLDER})

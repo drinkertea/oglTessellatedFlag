@@ -19,6 +19,7 @@ add_compile_definitions(VULKAN_HPP_NO_STRUCT_CONSTRUCTORS)
 
 target_link_libraries(${Target}
     glfw
+    glad
 )
 
 set_target_properties(${Target} PROPERTIES FOLDER Core)
