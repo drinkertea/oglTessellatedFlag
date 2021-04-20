@@ -13,12 +13,14 @@ namespace Engine
 
 struct Config
 {
-    float amplitude   = 0.1f;
-    float waveCount   = 1.7f;
-    float xBaseOffset = -0.5f;
-    float xTimeOffset = 0.0f;
-    float speed       = 0.5f;
-    uint32_t depth    = 20;
+    float    amplitude   = 0.1f;
+    float    waveCount   = 1.7f;
+    float    xBaseOffset = -0.5f;
+    float    xTimeOffset = 0.0f;
+    float    speed       = 0.5f;
+    uint32_t depth       = 20;
+    uint32_t texture     = 0;
+    bool     wireframe = false;
 };
 
 class Camera : public IWindowCallback

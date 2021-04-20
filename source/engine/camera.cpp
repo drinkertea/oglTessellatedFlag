@@ -147,30 +147,48 @@ void Camera::OnKeyPressed(int key, int action)
     if (action == GLFW_RELEASE)
     {
         mPressedKeys.erase(key);
+        return;
     }
-    else if (action == GLFW_PRESS)
+    if (action != GLFW_PRESS)
     {
-        mPressedKeys.emplace(key);
-        if (key == GLFW_KEY_EQUAL || key == GLFW_KEY_MINUS)
+        return;
+    }
+
+    if (key == GLFW_KEY_EQUAL || key == GLFW_KEY_MINUS)
+    {
+        float delta = key == GLFW_KEY_MINUS ? -1.0f : 1.0f;
+        if (mPressedKeys.count(GLFW_KEY_LEFT_CONTROL))
         {
-            float delta = 1.0;
-            if (key == GLFW_KEY_MINUS)
-                delta *= -1.0f;
-
-            if (mPressedKeys.count(GLFW_KEY_LEFT_CONTROL))
+            if (mPressedKeys.count(GLFW_KEY_LEFT_SHIFT))
             {
-                if (mPressedKeys.count(GLFW_KEY_LEFT_SHIFT))
-                    mConfig.depth += static_cast<uint32_t>(delta);
-                else
-                    mConfig.waveCount += delta * 0.1;
-
+                mConfig.depth += static_cast<uint32_t>(delta);
             }
-            else if (mPressedKeys.count(GLFW_KEY_LEFT_ALT))
-                mConfig.speed += delta * 0.01;
-            else if (mPressedKeys.count(GLFW_KEY_LEFT_SHIFT))
-                mConfig.amplitude += delta * 0.01;
+            else
+            {
+                mConfig.waveCount += delta * 0.1;
+            }
+        }
+        else if (mPressedKeys.count(GLFW_KEY_LEFT_ALT))
+        {
+            mConfig.speed += delta * 0.01;
+        }
+        else if (mPressedKeys.count(GLFW_KEY_LEFT_SHIFT))
+        {
+            mConfig.amplitude += delta * 0.01;
         }
     }
+    else if (key >= GLFW_KEY_1 && key <= GLFW_KEY_3)
+    {
+        mConfig.texture = static_cast<uint32_t>(key - GLFW_KEY_1);
+    }
+    else if (key == GLFW_KEY_W &&
+             mPressedKeys.count(GLFW_KEY_LEFT_CONTROL) &&
+             mPressedKeys.count(GLFW_KEY_LEFT_SHIFT))
+    {
+        mConfig.wireframe = !mConfig.wireframe;
+        return;
+    }
+    mPressedKeys.emplace(key);
 }
 
 void Camera::OnMouseMove(double x, double y)

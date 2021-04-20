@@ -3,7 +3,7 @@
 namespace Engine
 {
 
-
+constexpr uint32_t gMaxDepth = 1u << 16u;
 
 Tessellator::Tessellator(uint32_t depth)
 {
@@ -12,8 +12,8 @@ Tessellator::Tessellator(uint32_t depth)
 
 void Tessellator::Update(uint32_t depth)
 {
-    if (depth > 100)
-        depth = 100;
+    if (depth > gMaxDepth)
+        depth = gMaxDepth;
 
     float delta = 1.0 / static_cast<float>(depth + 1);
 

@@ -28,6 +28,22 @@ private:
     Tessellator mTessellator;
 };
 
+class Texture
+{
+public:
+    Texture(const char* path);
+    ~Texture();
+
+    void Use() const;
+    const char* GetPath() const;
+
+private:
+    uint32_t mTexture{ 0u };
+    const char* mPath = nullptr;
+};
+
+class Program;
+
 class Renderer
 {
 public:
@@ -37,11 +53,9 @@ public:
     void Render(const Camera& camera);
 
 private:
-    class Program;
     std::unique_ptr<Program>  mProgram;
     std::unique_ptr<Geometry> mGeometry;
-
-    uint32_t mTexture{ 0u };
+    std::unique_ptr<Texture>  mTexture;
 };
 
 };

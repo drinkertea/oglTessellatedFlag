@@ -10,11 +10,18 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <array>
 
 namespace Engine
 {
 
 static constexpr size_t sStrSize = 2048;
+
+static const std::array<const char*, 3> gTextures = {
+     "resources/textures/algeria.png",
+     "resources/textures/merina_people.png",
+     "resources/textures/maldives.png",
+};
 
 class Shader
 {
@@ -66,7 +73,7 @@ private:
     uint32_t mID = 0;
 };
 
-class Renderer::Program
+class Program
 {
 public:
     Program(std::vector<Shader>&& shaders)
@@ -130,34 +137,9 @@ Renderer::Renderer()
     shaders.emplace_back("resources/shaders/flag_fragment.glsl", GL_FRAGMENT_SHADER);
 
     mProgram = std::make_unique<Program>(std::move(shaders));
-
-    glGenTextures(1, &mTexture);
-    glBindTexture(GL_TEXTURE_2D, mTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    uint8_t* textureData = nullptr;
-    uint32_t width = 0;
-    uint32_t height = 0;
-    lodepng_decode24_file(&textureData, &width, &height, "resources/textures/merina_people.png");
-    if (textureData)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        throw std::runtime_error("Failed to load texture");
-    }
-    free(textureData);
 }
 
-Renderer::~Renderer()
-{
-
-}
+Renderer::~Renderer() = default;
 
 void Renderer::Render(const Camera& camera)
 {
@@ -165,10 +147,15 @@ void Renderer::Render(const Camera& camera)
     if (!mGeometry || config.depth != mGeometry->GetDepth())
         mGeometry = std::make_unique<Geometry>(config.depth);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    if (config.texture >= gTextures.size())
+        throw std::runtime_error("Unexpected texture index.");
 
-    glBindTexture(GL_TEXTURE_2D, mTexture);
+    if (!mTexture || gTextures[config.texture] != mTexture->GetPath())
+        mTexture = std::make_unique<Texture>(gTextures[config.texture]);
+
+    glClearColor(0.4f, 0.5f, 0.5f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glPolygonMode(GL_FRONT_AND_BACK, config.wireframe ? GL_LINE : GL_FILL);
 
     mProgram->Use();
 
@@ -178,6 +165,7 @@ void Renderer::Render(const Camera& camera)
     mProgram->SetFloat("amplitude", config.amplitude);
     mProgram->SetFloat("waveCount", config.waveCount);
 
+    mTexture->Use();
     mGeometry->Use();
 }
 
@@ -229,6 +217,47 @@ void Geometry::Use() const
 uint32_t Geometry::GetDepth() const
 {
     return mDepth;
+}
+
+Texture::Texture(const char* path)
+    : mPath(path)
+{
+    glGenTextures(1, &mTexture);
+    glBindTexture(GL_TEXTURE_2D, mTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    uint8_t* textureData = nullptr;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    lodepng_decode24_file(&textureData, &width, &height, path);
+    if (textureData)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        throw std::runtime_error("Failed to load texture");
+    }
+    free(textureData);
+}
+
+Texture::~Texture()
+{
+    glDeleteTextures(1, &mTexture);
+}
+
+void Texture::Use() const
+{
+    glBindTexture(GL_TEXTURE_2D, mTexture);
+}
+
+const char* Texture::GetPath() const
+{
+    return mPath;
 }
 
 };

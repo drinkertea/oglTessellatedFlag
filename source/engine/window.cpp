@@ -64,15 +64,6 @@ public:
     }
 
     static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-        if (key == GLFW_KEY_K && action == GLFW_PRESS)
-        {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        }
-        if (key == GLFW_KEY_L && action == GLFW_PRESS)
-        {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
-
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         {
             glfwSetWindowShouldClose(window, true);
