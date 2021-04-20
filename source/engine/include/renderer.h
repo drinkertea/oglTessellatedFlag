@@ -6,13 +6,16 @@
 namespace Engine
 {
 
+class Camera;
+
 class Renderer
 {
 public:
     Renderer();
     ~Renderer();
 
-    void Render();
+    void Render(const Camera& camera);
+
 private:
     class Program;
     std::unique_ptr<Program> mProgram;

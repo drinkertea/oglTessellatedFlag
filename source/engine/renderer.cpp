@@ -1,4 +1,5 @@
-#include "include/renderer.h"
+#include "renderer.h"
+#include "camera.h"
 
 #include <glad/glad.h>
 #include <lodepng.h>
@@ -100,6 +101,11 @@ public:
         glUniform1f(glGetUniformLocation(mID, name.c_str()), value);
     }
 
+    void setMat4(const std::string& name, const glm::mat4& mat) const
+    {
+        glUniformMatrix4fv(glGetUniformLocation(mID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+    }
+
 private:
     void CheckCompileErrors()
     {
@@ -119,17 +125,17 @@ private:
 Renderer::Renderer()
 {
     std::vector<Shader> shaders;
-    shaders.emplace_back("resources/shaders/flag.vs", GL_VERTEX_SHADER);
-    shaders.emplace_back("resources/shaders/flag.fs", GL_FRAGMENT_SHADER);
+    shaders.emplace_back("resources/shaders/flag_vertex.glsl", GL_VERTEX_SHADER);
+    shaders.emplace_back("resources/shaders/flag_fragment.glsl", GL_FRAGMENT_SHADER);
 
     mProgram = std::make_unique<Program>(std::move(shaders));
 
     float vertices[] = {
-        // positions          // colors           // mTexture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
+        // positions          // texture coords
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, // top right
+         0.5f, -0.5f, 0.0f,   1.0f, 1.0f, // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 1.0f, // bottom left
+        -0.5f,  0.5f, 0.0f,   0.0f, 0.0f  // top left 
     };
     uint32_t indices[] = {
         0, 1, 3, // first triangle
@@ -149,12 +155,10 @@ Renderer::Renderer()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
 
     glGenTextures(1, &mTexture);
     glBindTexture(GL_TEXTURE_2D, mTexture);
@@ -179,9 +183,12 @@ Renderer::Renderer()
     free(textureData);
 }
 
-Renderer::~Renderer() = default;
+Renderer::~Renderer()
+{
 
-void Renderer::Render()
+}
+
+void Renderer::Render(const Camera& camera)
 {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -189,7 +196,11 @@ void Renderer::Render()
     glBindTexture(GL_TEXTURE_2D, mTexture);
 
     mProgram->Use();
+
     glBindVertexArray(mVertexArray);
+
+    mProgram->setMat4("viewProj", camera.GetViewProjection());
+
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 

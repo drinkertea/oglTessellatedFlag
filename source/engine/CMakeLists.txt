@@ -2,6 +2,7 @@ set(Target Engine)
 ADD_LIBRARY(${Target} STATIC)
 
 file(GLOB PublicHeaders "${CMAKE_CURRENT_LIST_DIR}/include/*.h")
+file(GLOB Shaders "${CMAKE_SOURCE_DIR}/resources/shaders/*.glsl")
 
 target_sources(${Target}
     PUBLIC
@@ -9,6 +10,8 @@ target_sources(${Target}
     PRIVATE
         window.cpp
         renderer.cpp
+        camera.cpp
+        ${Shaders}
 )
 
 target_include_directories(${Target}
@@ -22,6 +25,7 @@ target_link_libraries(${Target}
     glfw
     glad
     lodepng
+    glm
 )
 
 set_target_properties(${Target} PROPERTIES FOLDER Core)
