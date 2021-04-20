@@ -1,6 +1,7 @@
 #pragma once
 
 #include "window.h"
+#include "config.h"
 
 #include <glm/glm.hpp>
 
@@ -11,34 +12,23 @@
 namespace Engine
 {
 
-struct Config
-{
-    float    amplitude   = 0.1f;
-    float    waveCount   = 1.7f;
-    float    xBaseOffset = -0.5f;
-    float    xTimeOffset = 0.0f;
-    float    speed       = 0.5f;
-    uint32_t depth       = 20;
-    uint32_t texture     = 0;
-    bool     wireframe = false;
-};
-
 class Camera : public IWindowCallback
 {
 public:
-    Camera(Window& window);
+    Camera(Window& window, Config& config);
     ~Camera() override;
 
     void Update();
     glm::mat4 GetViewProjection() const;
 
-    void OnKeyPressed(int key, int action) override;
+    void OnKeyEvent(int key, int action) override;
     void OnMouseMove(double x, double y) override;
 
     const Config& CurrentConfig() const;
 
 private:
     Window& mWindow;
+    Config& mConfig;
 
     static constexpr double sYAW = -90.0;
     static constexpr double sPITCH = 0.0;
@@ -54,8 +44,6 @@ private:
 
     bool mFirst = true;
     std::set<int> mPressedKeys;
-
-    Config mConfig{};
 
     class CameraImpl;
     std::unique_ptr<CameraImpl> mImpl;

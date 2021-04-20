@@ -97,8 +97,9 @@ private:
     }
 };
 
-Camera::Camera(Window& window)
+Camera::Camera(Window& window, Config& config)
     : mWindow(window)
+    , mConfig(config)
     , mImpl(std::make_unique<CameraImpl>(glm::vec3(0.0f, 0.0f, 3.0f)))
     , mLastX(mWindow.GetWidth() / 2)
     , mLastY(mWindow.GetHeight() / 2)
@@ -142,7 +143,7 @@ glm::mat4 Camera::GetViewProjection() const
     return projection * view;
 }
 
-void Camera::OnKeyPressed(int key, int action)
+void Camera::OnKeyEvent(int key, int action)
 {
     if (action == GLFW_RELEASE)
     {
@@ -154,40 +155,11 @@ void Camera::OnKeyPressed(int key, int action)
         return;
     }
 
-    if (key == GLFW_KEY_EQUAL || key == GLFW_KEY_MINUS)
+    if (mConfig.OnKeyPressed(key, mPressedKeys))
     {
-        float delta = key == GLFW_KEY_MINUS ? -1.0f : 1.0f;
-        if (mPressedKeys.count(GLFW_KEY_LEFT_CONTROL))
-        {
-            if (mPressedKeys.count(GLFW_KEY_LEFT_SHIFT))
-            {
-                mConfig.depth += static_cast<uint32_t>(delta);
-            }
-            else
-            {
-                mConfig.waveCount += delta * 0.1;
-            }
-        }
-        else if (mPressedKeys.count(GLFW_KEY_LEFT_ALT))
-        {
-            mConfig.speed += delta * 0.01;
-        }
-        else if (mPressedKeys.count(GLFW_KEY_LEFT_SHIFT))
-        {
-            mConfig.amplitude += delta * 0.01;
-        }
-    }
-    else if (key >= GLFW_KEY_1 && key <= GLFW_KEY_3)
-    {
-        mConfig.texture = static_cast<uint32_t>(key - GLFW_KEY_1);
-    }
-    else if (key == GLFW_KEY_W &&
-             mPressedKeys.count(GLFW_KEY_LEFT_CONTROL) &&
-             mPressedKeys.count(GLFW_KEY_LEFT_SHIFT))
-    {
-        mConfig.wireframe = !mConfig.wireframe;
         return;
     }
+
     mPressedKeys.emplace(key);
 }
 
@@ -209,7 +181,7 @@ void Camera::OnMouseMove(double x, double y)
     mImpl->ProcessMouseMovement(xoffset, yoffset);
 }
 
-const Config& Camera::CurrentConfig() const const
+const Config& Camera::CurrentConfig() const
 {
     return mConfig;
 }

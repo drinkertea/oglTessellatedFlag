@@ -11,14 +11,19 @@ namespace Engine
 class Window::WindowImpl
 {
 public:
-    WindowImpl(uint32_t width, uint32_t height)
+    WindowImpl(uint32_t width, uint32_t height, bool vsync)
         : mWidth(width)
         , mHeight(height)
+        , mVSync(vsync)
     {
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        if (!mVSync)
+        {
+            glfwWindowHint(GLFW_DOUBLEBUFFER, GL_FALSE);
+        }
 
         mWindow = glfwCreateWindow(width, height, "OpenGL Tessellation Sample", nullptr, nullptr);
         if (!mWindow)
@@ -72,7 +77,7 @@ public:
 
         for (auto& callback : GetWindow(window).GetCallbacks())
         {
-            callback.get().OnKeyPressed(key, action);
+            callback.get().OnKeyEvent(key, action);
         }
     }
 
@@ -81,7 +86,14 @@ public:
         while (!glfwWindowShouldClose(mWindow))
         {
             callback();
-            glfwSwapBuffers(mWindow);
+            if (mVSync)
+            {
+                glfwSwapBuffers(mWindow);
+            }
+            else
+            {
+                glFlush();
+            }
             glfwPollEvents();
         }
     }
@@ -111,16 +123,22 @@ public:
         return mHeight;
     }
 
+    void SetTitle(const std::string& title)
+    {
+        glfwSetWindowTitle(mWindow, title.c_str());
+    }
+
 private:
     GLFWwindow* mWindow = nullptr;
     uint32_t mWidth = 0;
     uint32_t mHeight = 0;
+    bool     mVSync = false;
 
     std::vector<IWindowCallback::Ref> mCallbacks;
 };
 
-Window::Window(uint32_t width, uint32_t height)
-    : mImpl(std::make_unique<WindowImpl>(width, height))
+Window::Window(uint32_t width, uint32_t height, bool vsync)
+    : mImpl(std::make_unique<WindowImpl>(width, height, vsync))
 {
 }
 
@@ -134,6 +152,11 @@ void Window::EventLoop(std::function<void()> callback)
 void Window::AddCallback(IWindowCallback& callback)
 {
     mImpl->AddCallback(callback);
+}
+
+void Window::SetTitle(const std::string& title)
+{
+    mImpl->SetTitle(title);
 }
 
 uint32_t Window::GetWidth() const
