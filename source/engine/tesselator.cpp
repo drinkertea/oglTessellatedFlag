@@ -38,16 +38,12 @@ void Tessellator::Update(uint32_t depth)
 
     for (uint32_t x = 0; x < depth + 1; ++x)
     {
-        for (uint32_t y = 0; y < depth + 1; ++y)
-        {
-            auto xf = static_cast<float>(x) * delta;
-            auto yf = static_cast<float>(y) * delta;
-            addIndices();
-            addVertex(xf, yf + delta);
-            addVertex(xf + delta, yf + delta);
-            addVertex(xf + delta, yf);
-            addVertex(xf, yf);
-        }
+        auto xf = static_cast<float>(x) * delta;
+        addIndices();
+        addVertex(xf, 1.0f);
+        addVertex(xf + delta, 1.0f);
+        addVertex(xf + delta, 0.0f);
+        addVertex(xf, 0.0f);
     }
     glm::vec3 translation(-0.5f, -0.5f, 0.0f);
     for (auto& v : newVerts)

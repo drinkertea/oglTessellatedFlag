@@ -124,42 +124,12 @@ private:
 };
 
 Renderer::Renderer()
-    : mTessellator(100)
 {
     std::vector<Shader> shaders;
     shaders.emplace_back("resources/shaders/flag_vertex.glsl", GL_VERTEX_SHADER);
     shaders.emplace_back("resources/shaders/flag_fragment.glsl", GL_FRAGMENT_SHADER);
 
     mProgram = std::make_unique<Program>(std::move(shaders));
-
-    uint32_t VBO = 0;
-    uint32_t EBO = 0;
-    glGenVertexArrays(1, &mVertexArray);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(mVertexArray);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        Tessellator::sVertexSize * mTessellator.GetVertices().size(),
-        mTessellator.GetVertices().data(),
-        GL_STATIC_DRAW
-    );
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        sizeof(uint32_t) * mTessellator.Getindices().size(),
-        mTessellator.Getindices().data(),
-        GL_STATIC_DRAW
-    );
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
 
     glGenTextures(1, &mTexture);
     glBindTexture(GL_TEXTURE_2D, mTexture);
@@ -191,6 +161,10 @@ Renderer::~Renderer()
 
 void Renderer::Render(const Camera& camera)
 {
+    const auto& config = camera.CurrentConfig();
+    if (!mGeometry || config.depth != mGeometry->GetDepth())
+        mGeometry = std::make_unique<Geometry>(config.depth);
+
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -198,17 +172,63 @@ void Renderer::Render(const Camera& camera)
 
     mProgram->Use();
 
-    glBindVertexArray(mVertexArray);
-
     mProgram->SetMat4("viewProj", camera.GetViewProjection());
-
-    const auto& config = camera.CurrentConfig();
     mProgram->SetFloat("xOffset",   config.xBaseOffset);
     mProgram->SetFloat("time",      config.xTimeOffset);
     mProgram->SetFloat("amplitude", config.amplitude);
     mProgram->SetFloat("waveCount", config.waveCount);
 
+    mGeometry->Use();
+}
+
+Geometry::Geometry(uint32_t depth)
+    : mTessellator(depth)
+    , mDepth(depth)
+{
+    glGenVertexArrays(1, &mVertexArray);
+    glGenBuffers(1, &mVertexBuffer);
+    glGenBuffers(1, &mIndexBuffer);
+
+    glBindVertexArray(mVertexArray);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        Tessellator::sVertexSize * mTessellator.GetVertices().size(),
+        mTessellator.GetVertices().data(),
+        GL_STATIC_DRAW
+    );
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        sizeof(uint32_t) * mTessellator.Getindices().size(),
+        mTessellator.Getindices().data(),
+        GL_STATIC_DRAW
+    );
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+}
+
+Geometry::~Geometry()
+{
+    glDeleteVertexArrays(1, &mVertexArray);
+    glDeleteBuffers(1, &mVertexBuffer);
+    glDeleteBuffers(1, &mIndexBuffer);
+}
+
+void Geometry::Use() const
+{
+    glBindVertexArray(mVertexArray);
     glDrawElements(GL_TRIANGLES, mTessellator.Getindices().size(), GL_UNSIGNED_INT, 0);
+}
+
+uint32_t Geometry::GetDepth() const
+{
+    return mDepth;
 }
 
 };

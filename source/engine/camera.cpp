@@ -115,7 +115,7 @@ void Camera::Update()
     double currentFrame = glfwGetTime();
     mDeltaTime = currentFrame - mLastFrame;
     mLastFrame = currentFrame;
-    mConfig.xTimeOffset = static_cast<float>(std::fmod(mLastFrame, 2.0 * 3.141592653589793238463)) * mConfig.speed;
+    mConfig.xTimeOffset = static_cast<float>(mLastFrame) * mConfig.speed;
 
     for (auto mLastKey : mPressedKeys)
     {
@@ -153,16 +153,22 @@ void Camera::OnKeyPressed(int key, int action)
         mPressedKeys.emplace(key);
         if (key == GLFW_KEY_EQUAL || key == GLFW_KEY_MINUS)
         {
-            float delta = 0.1;
+            float delta = 1.0;
             if (key == GLFW_KEY_MINUS)
                 delta *= -1.0f;
 
             if (mPressedKeys.count(GLFW_KEY_LEFT_CONTROL))
-                mConfig.waveCount += delta;
+            {
+                if (mPressedKeys.count(GLFW_KEY_LEFT_SHIFT))
+                    mConfig.depth += static_cast<uint32_t>(delta);
+                else
+                    mConfig.waveCount += delta * 0.1;
+
+            }
             else if (mPressedKeys.count(GLFW_KEY_LEFT_ALT))
-                mConfig.speed += delta * 0.1;
+                mConfig.speed += delta * 0.01;
             else if (mPressedKeys.count(GLFW_KEY_LEFT_SHIFT))
-                mConfig.amplitude += delta * 0.1;
+                mConfig.amplitude += delta * 0.01;
         }
     }
 }
