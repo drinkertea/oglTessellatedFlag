@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tessellator.h"
+
 #include <cstdint>
 #include <memory>
 
@@ -22,6 +24,8 @@ private:
 
     uint32_t mTexture = 0;
     uint32_t mVertexArray = 0;
+
+    Tessellator mTessellator;
 };
 
 };

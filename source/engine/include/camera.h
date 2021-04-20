@@ -11,6 +11,15 @@
 namespace Engine
 {
 
+struct Config
+{
+    float amplitude   = 0.1f;
+    float waveCount   = 1.7f;
+    float xBaseOffset = -0.5f;
+    float xTimeOffset = 0.0f;
+    float speed       = 0.5f;
+};
+
 class Camera : public IWindowCallback
 {
 public:
@@ -22,6 +31,8 @@ public:
 
     void OnKeyPressed(int key, int action) override;
     void OnMouseMove(double x, double y) override;
+
+    const Config& CurrentConfig() const;
 
 private:
     Window& mWindow;
@@ -40,6 +51,8 @@ private:
 
     bool mFirst = true;
     std::set<int> mPressedKeys;
+
+    Config mConfig{};
 
     class CameraImpl;
     std::unique_ptr<CameraImpl> mImpl;

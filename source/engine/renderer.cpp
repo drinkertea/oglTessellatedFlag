@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include "camera.h"
+#include "tessellator.h"
 
 #include <glad/glad.h>
 #include <lodepng.h>
@@ -101,7 +102,7 @@ public:
         glUniform1f(glGetUniformLocation(mID, name.c_str()), value);
     }
 
-    void setMat4(const std::string& name, const glm::mat4& mat) const
+    void SetMat4(const std::string& name, const glm::mat4& mat) const
     {
         glUniformMatrix4fv(glGetUniformLocation(mID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
@@ -123,6 +124,7 @@ private:
 };
 
 Renderer::Renderer()
+    : mTessellator(100)
 {
     std::vector<Shader> shaders;
     shaders.emplace_back("resources/shaders/flag_vertex.glsl", GL_VERTEX_SHADER);
@@ -130,17 +132,6 @@ Renderer::Renderer()
 
     mProgram = std::make_unique<Program>(std::move(shaders));
 
-    float vertices[] = {
-        // positions          // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, // top right
-         0.5f, -0.5f, 0.0f,   1.0f, 1.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 1.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   0.0f, 0.0f  // top left 
-    };
-    uint32_t indices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
     uint32_t VBO = 0;
     uint32_t EBO = 0;
     glGenVertexArrays(1, &mVertexArray);
@@ -150,10 +141,20 @@ Renderer::Renderer()
     glBindVertexArray(mVertexArray);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        Tessellator::sVertexSize * mTessellator.GetVertices().size(),
+        mTessellator.GetVertices().data(),
+        GL_STATIC_DRAW
+    );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        sizeof(uint32_t) * mTessellator.Getindices().size(),
+        mTessellator.Getindices().data(),
+        GL_STATIC_DRAW
+    );
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -162,8 +163,8 @@ Renderer::Renderer()
 
     glGenTextures(1, &mTexture);
     glBindTexture(GL_TEXTURE_2D, mTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -199,9 +200,15 @@ void Renderer::Render(const Camera& camera)
 
     glBindVertexArray(mVertexArray);
 
-    mProgram->setMat4("viewProj", camera.GetViewProjection());
+    mProgram->SetMat4("viewProj", camera.GetViewProjection());
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    const auto& config = camera.CurrentConfig();
+    mProgram->SetFloat("xOffset",   config.xBaseOffset);
+    mProgram->SetFloat("time",      config.xTimeOffset);
+    mProgram->SetFloat("amplitude", config.amplitude);
+    mProgram->SetFloat("waveCount", config.waveCount);
+
+    glDrawElements(GL_TRIANGLES, mTessellator.Getindices().size(), GL_UNSIGNED_INT, 0);
 }
 
 };

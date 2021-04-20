@@ -11,6 +11,7 @@ target_sources(${Target}
         window.cpp
         renderer.cpp
         camera.cpp
+        tesselator.cpp
         ${Shaders}
 )
 
