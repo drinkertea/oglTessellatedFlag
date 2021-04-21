@@ -14,6 +14,7 @@ enum class CameraMovement {
     RIGHT
 };
 
+// This class copied as this from LearnOpengGL camra sample
 class Camera::CameraImpl
 {
 public:

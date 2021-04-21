@@ -121,60 +121,6 @@ private:
     uint32_t mID = 0;
 };
 
-Renderer::Renderer()
-{
-    std::vector<Shader> shaders;
-    shaders.emplace_back("resources/shaders/flag_vertex.glsl", GL_VERTEX_SHADER);
-    shaders.emplace_back("resources/shaders/flag_fragment.glsl", GL_FRAGMENT_SHADER);
-
-    mProgram = std::make_unique<Program>(std::move(shaders));
-
-    glFrontFace(GL_CW);
-    glEnable(GL_DEPTH_TEST);
-
-    for (const auto& texturePath : gTextures)
-    {
-        mTextures.emplace_back(texturePath);
-    }
-}
-
-Renderer::~Renderer() = default;
-
-void Renderer::Render(const Camera& camera)
-{
-    const auto& config = camera.CurrentConfig();
-    if (!mGeometry || config.depth != mGeometry->GetDepth())
-    {
-        mGeometry = std::make_unique<Geometry>(config.depth);
-    }
-
-    if (config.texture >= gTextures.size())
-    {
-        throw std::runtime_error("Unexpected texture index.");
-    }
-
-    glClearColor(0.4f, 0.5f, 0.5f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glPolygonMode(GL_FRONT_AND_BACK, config.wireframe ? GL_LINE : GL_FILL);
-
-    mProgram->Use();
-
-    glm::mat4 model = glm::identity<glm::mat4>();
-    glm::vec3 axis(config.rAxis[0], config.rAxis[1], config.rAxis[2]);
-    if (axis != glm::vec3(0.0f, 0.0f, 0.0f))
-        model = glm::rotate(model, glm::radians(config.angle), axis);
-    model = glm::translate(model, glm::vec3(-0.5f, -0.5f, 0.0f));
-
-    mProgram->SetMat4( "viewProj",  camera.GetViewProjection());
-    mProgram->SetMat4( "model",     model);
-    mProgram->SetFloat("time",      config.xTimeOffset);
-    mProgram->SetFloat("amplitude", config.amplitude);
-    mProgram->SetFloat("waveCount", config.waveCount);
-
-    mTextures[config.texture].Use();
-    mGeometry->Use();
-}
-
 Geometry::Geometry(uint32_t depth)
     : mTessellator(depth)
     , mDepth(depth)
@@ -259,6 +205,60 @@ Texture::~Texture()
 void Texture::Use() const
 {
     glBindTexture(GL_TEXTURE_2D, mTexture);
+}
+
+Renderer::Renderer()
+{
+    std::vector<Shader> shaders;
+    shaders.emplace_back("resources/shaders/flag_vertex.glsl", GL_VERTEX_SHADER);
+    shaders.emplace_back("resources/shaders/flag_fragment.glsl", GL_FRAGMENT_SHADER);
+
+    mProgram = std::make_unique<Program>(std::move(shaders));
+
+    glFrontFace(GL_CW);
+    glEnable(GL_DEPTH_TEST);
+
+    for (const auto& texturePath : gTextures)
+    {
+        mTextures.emplace_back(texturePath);
+    }
+}
+
+Renderer::~Renderer() = default;
+
+void Renderer::Render(const Camera& camera)
+{
+    const auto& config = camera.CurrentConfig();
+    if (!mGeometry || config.depth != mGeometry->GetDepth())
+    {
+        mGeometry = std::make_unique<Geometry>(config.depth);
+    }
+
+    if (config.texture >= gTextures.size())
+    {
+        throw std::runtime_error("Unexpected texture index.");
+    }
+
+    glClearColor(0.4f, 0.5f, 0.5f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glPolygonMode(GL_FRONT_AND_BACK, config.wireframe ? GL_LINE : GL_FILL);
+
+    mProgram->Use();
+
+    glm::mat4 model = glm::identity<glm::mat4>();
+    glm::vec3 axis(config.rAxis[0], config.rAxis[1], config.rAxis[2]);
+    if (axis != glm::vec3(0.0f, 0.0f, 0.0f))
+        model = glm::rotate(model, glm::radians(config.angle), axis);
+    model = glm::translate(model, glm::vec3(-0.5f, -0.5f, 0.0f));
+
+    mProgram->SetMat4( "viewProj",  camera.GetViewProjection());
+    mProgram->SetMat4( "model",     model);
+    mProgram->SetFloat("time",      config.xTimeOffset);
+    mProgram->SetFloat("amplitude", config.amplitude);
+    mProgram->SetFloat("waveCount", config.waveCount);
+
+    mTextures[config.texture].Use();
+    mGeometry->Use();
 }
 
 };

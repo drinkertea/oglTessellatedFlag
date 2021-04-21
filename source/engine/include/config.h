@@ -16,7 +16,6 @@ struct Config
     uint32_t depth       = 50;
     uint32_t texture     = 0;
     bool     wireframe   = false;
-
     float    rAxis[3]    = { -1.0f, 1.0f, 0.5f };
     float    angle       = 30.0f;
 

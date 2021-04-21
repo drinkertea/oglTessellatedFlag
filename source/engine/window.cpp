@@ -130,9 +130,9 @@ public:
 
 private:
     GLFWwindow* mWindow = nullptr;
-    uint32_t mWidth = 0;
-    uint32_t mHeight = 0;
-    bool     mVSync = false;
+    uint32_t    mWidth = 0;
+    uint32_t    mHeight = 0;
+    bool        mVSync = false;
 
     std::vector<IWindowCallback::Ref> mCallbacks;
 };

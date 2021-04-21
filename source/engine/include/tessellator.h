@@ -20,7 +20,7 @@ public:
     static_assert(sVertexSize == sizeof(float) * 5);
 
     using VertexBuffer = std::vector<Vertex>;
-    using IndexBuffer = std::vector<uint32_t>;
+    using IndexBuffer  = std::vector<uint32_t>;
 
     Tessellator(uint32_t depth = 0);
     void Update(uint32_t depth);

@@ -10,6 +10,7 @@ namespace Engine
 {
 
 class Camera;
+class Program;
 
 class Geometry
 {
@@ -44,11 +45,9 @@ public:
     Texture& operator=(const Texture&) = delete;
 
 private:
-    uint32_t mTexture{ 0u };
+    uint32_t    mTexture{ 0u };
     const char* mPath = nullptr;
 };
-
-class Program;
 
 class Renderer
 {

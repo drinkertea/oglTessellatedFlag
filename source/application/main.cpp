@@ -11,12 +11,12 @@ int main()
 {
     try
     {
-        Engine::Window window(1280, 720, false);
-        Engine::Config config{};
-        Engine::Camera camera(window, config);
-        Engine::Renderer renderer;
+        Engine::Window   window{ 1280, 720, false };
+        Engine::Config   config{};
+        Engine::Camera   camera{ window, config };
+        Engine::Renderer renderer{};
+        Engine::Counter  counter{};
 
-        Engine::Counter counter;
         window.EventLoop([&] {
             camera.Update();
             renderer.Render(camera);
