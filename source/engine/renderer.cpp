@@ -131,6 +131,11 @@ Renderer::Renderer()
 
     glFrontFace(GL_CW);
     glEnable(GL_DEPTH_TEST);
+
+    for (const auto& texturePath : gTextures)
+    {
+        mTextures.emplace_back(texturePath);
+    }
 }
 
 Renderer::~Renderer() = default;
@@ -146,11 +151,6 @@ void Renderer::Render(const Camera& camera)
     if (config.texture >= gTextures.size())
     {
         throw std::runtime_error("Unexpected texture index.");
-    }
-
-    if (!mTexture || gTextures[config.texture] != mTexture->GetPath())
-    {
-        mTexture = std::make_unique<Texture>(gTextures[config.texture]);
     }
 
     glClearColor(0.4f, 0.5f, 0.5f, 1.0f);
@@ -171,7 +171,7 @@ void Renderer::Render(const Camera& camera)
     mProgram->SetFloat("amplitude", config.amplitude);
     mProgram->SetFloat("waveCount", config.waveCount);
 
-    mTexture->Use();
+    mTextures[config.texture].Use();
     mGeometry->Use();
 }
 
@@ -259,11 +259,6 @@ Texture::~Texture()
 void Texture::Use() const
 {
     glBindTexture(GL_TEXTURE_2D, mTexture);
-}
-
-const char* Texture::GetPath() const
-{
-    return mPath;
 }
 
 };

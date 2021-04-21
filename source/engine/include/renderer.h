@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <deque>
 
 namespace Engine
 {
@@ -18,6 +19,9 @@ public:
 
     void Use() const;
     uint32_t GetDepth() const;
+
+    Geometry(const Geometry&) = delete;
+    Geometry& operator=(const Geometry&) = delete;
 
 private:
     uint32_t mVertexArray  = 0;
@@ -35,7 +39,9 @@ public:
     ~Texture();
 
     void Use() const;
-    const char* GetPath() const;
+
+    Texture(const Texture&) = delete;
+    Texture& operator=(const Texture&) = delete;
 
 private:
     uint32_t mTexture{ 0u };
@@ -55,7 +61,7 @@ public:
 private:
     std::unique_ptr<Program>  mProgram;
     std::unique_ptr<Geometry> mGeometry;
-    std::unique_ptr<Texture>  mTexture;
+    std::deque<Texture>       mTextures;
 };
 
 };
