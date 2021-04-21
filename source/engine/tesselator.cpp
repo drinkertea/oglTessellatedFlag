@@ -45,9 +45,6 @@ void Tessellator::Update(uint32_t depth)
         addVertex(xf + delta, 0.0f);
         addVertex(xf, 0.0f);
     }
-    glm::vec3 translation(-0.5f, -0.5f, 0.0f);
-    for (auto& v : newVerts)
-        v.position += translation;
 
     mVertices.swap(newVerts);
     mIndices.swap(newInds);

@@ -18,6 +18,10 @@ bool Config::OnKeyPressed(int key, const std::set<int>& pressedKeys)
             {
                 depth += static_cast<uint32_t>(delta);
             }
+            else if (pressedKeys.count(GLFW_KEY_LEFT_ALT))
+            {
+                angle += delta;
+            }
             else
             {
                 waveCount += delta * 0.1;
@@ -34,7 +38,19 @@ bool Config::OnKeyPressed(int key, const std::set<int>& pressedKeys)
     }
     else if (key >= GLFW_KEY_1 && key <= GLFW_KEY_3)
     {
-        texture = static_cast<uint32_t>(key - GLFW_KEY_1);
+        auto value = static_cast<uint32_t>(key - GLFW_KEY_1);
+        if (pressedKeys.count(GLFW_KEY_LEFT_CONTROL))
+        {
+            rAxis[value] -= 0.1f;
+        }
+        else if (pressedKeys.count(GLFW_KEY_LEFT_SHIFT))
+        {
+            rAxis[value] += 0.1f;
+        }
+        else
+        {
+            texture = value;
+        }
     }
     else if (key == GLFW_KEY_W &&
         pressedKeys.count(GLFW_KEY_LEFT_CONTROL) &&
@@ -54,7 +70,11 @@ std::string Config::ToString() const
     ss << "speed: " << speed << "; ";
     ss << "depth: " << depth << "; ";
     ss << "texture: " << texture << "; ";
-    ss << "wireframe: " << wireframe << ";";
+    ss << "wireframe: " << wireframe << "; ";
+    ss << "angle: " << angle << "; ";
+    ss << "rx: " << rAxis[0] << "; ";
+    ss << "ry: " << rAxis[1] << "; ";
+    ss << "rz: " << rAxis[2] << ";";
     return ss.str();
 }
 

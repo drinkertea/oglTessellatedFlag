@@ -4,6 +4,7 @@
 
 #include <glad/glad.h>
 #include <lodepng.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <stdexcept>
 #include <string>
@@ -94,16 +95,6 @@ public:
         glUseProgram(mID);
     }
 
-    void SetBool(const std::string& name, bool value) const
-    {
-        glUniform1i(glGetUniformLocation(mID, name.c_str()), (int)value);
-    }
-
-    void SetInt(const std::string& name, int value) const
-    {
-        glUniform1i(glGetUniformLocation(mID, name.c_str()), value);
-    }
-
     void SetFloat(const std::string& name, float value) const
     {
         glUniform1f(glGetUniformLocation(mID, name.c_str()), value);
@@ -145,13 +136,19 @@ void Renderer::Render(const Camera& camera)
 {
     const auto& config = camera.CurrentConfig();
     if (!mGeometry || config.depth != mGeometry->GetDepth())
+    {
         mGeometry = std::make_unique<Geometry>(config.depth);
+    }
 
     if (config.texture >= gTextures.size())
+    {
         throw std::runtime_error("Unexpected texture index.");
+    }
 
     if (!mTexture || gTextures[config.texture] != mTexture->GetPath())
+    {
         mTexture = std::make_unique<Texture>(gTextures[config.texture]);
+    }
 
     glClearColor(0.4f, 0.5f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -159,8 +156,14 @@ void Renderer::Render(const Camera& camera)
 
     mProgram->Use();
 
+    glm::mat4 model = glm::identity<glm::mat4>();
+    glm::vec3 axis(config.rAxis[0], config.rAxis[1], config.rAxis[2]);
+    if (axis != glm::vec3(0.0f, 0.0f, 0.0f))
+        model = glm::rotate(model, glm::radians(config.angle), axis);
+    model = glm::translate(model, glm::vec3(-0.5f, -0.5f, 0.0f));
+
     mProgram->SetMat4("viewProj", camera.GetViewProjection());
-    mProgram->SetFloat("xOffset",   config.xBaseOffset);
+    mProgram->SetMat4("model", model);
     mProgram->SetFloat("time",      config.xTimeOffset);
     mProgram->SetFloat("amplitude", config.amplitude);
     mProgram->SetFloat("waveCount", config.waveCount);
