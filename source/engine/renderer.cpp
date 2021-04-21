@@ -27,14 +27,14 @@ static const std::array<const char*, 3> gTextures = {
 class Shader
 {
 public:
-    Shader(const char* vertexPath, int type)
+    Shader(const char* path, int type)
     {
         std::string vertexCode;
         std::ifstream vShaderFile;
         vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         try
         {
-            vShaderFile.open(vertexPath);
+            vShaderFile.open(path);
             std::stringstream vShaderStream;
             vShaderStream << vShaderFile.rdbuf();
 
@@ -43,7 +43,7 @@ public:
         }
         catch (std::ifstream::failure& e)
         {
-            throw std::runtime_error("Unable to read shader from file");
+            throw std::runtime_error("Unable to read shader from file, path: " + std::string(path));
         }
         const char* vShaderCode = vertexCode.c_str();
         mID = glCreateShader(type);
@@ -201,9 +201,9 @@ Geometry::Geometry(uint32_t depth)
         GL_STATIC_DRAW
     );
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, Tessellator::sVertexSize, (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, Tessellator::sVertexSize, (void*)(sizeof(Tessellator::Vertex::position)));
     glEnableVertexAttribArray(1);
 }
 
@@ -246,7 +246,7 @@ Texture::Texture(const char* path)
     }
     else
     {
-        throw std::runtime_error("Failed to load texture");
+        throw std::runtime_error("Failed to load texture, path: " + std::string(path));
     }
     free(textureData);
 }
