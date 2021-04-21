@@ -20,7 +20,6 @@ struct Config
     float    rAxis[3]    = { -1.0f, 1.0f, 0.5f };
     float    angle       = 30.0f;
 
-
     bool OnKeyPressed(int key, const std::set<int>& pressedKeys);
     std::string ToString() const;
 };

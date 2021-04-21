@@ -13,6 +13,7 @@ target_sources(${Target}
         camera.cpp
         tesselator.cpp
         config.cpp
+        counter.cpp
         ${Shaders}
 )
 

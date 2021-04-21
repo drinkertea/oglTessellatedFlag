@@ -4,13 +4,14 @@
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aTexCoord;
 
-out vec2 TexCoord;
-
-uniform mat4 viewProj;
-uniform mat4 model;
+uniform mat4  viewProj;
+uniform mat4  model;
 uniform float time;
 uniform float amplitude;
 uniform float waveCount;
+
+out vec2  texCoord;
+out float amplitudeVal;
 
 void main()
 {
@@ -19,5 +20,6 @@ void main()
     pos.z += amplitude * (sin(time * coef) + sin((pos.x - time)*coef));
 
     gl_Position = viewProj * model* vec4(pos, 1.0);
-    TexCoord = vec2(aTexCoord.x, aTexCoord.y);
+    texCoord = vec2(aTexCoord.x, aTexCoord.y);
+    amplitudeVal = (pos.z + 2.0 * amplitude) / (4.0 * amplitude);
 }

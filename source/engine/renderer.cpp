@@ -128,6 +128,9 @@ Renderer::Renderer()
     shaders.emplace_back("resources/shaders/flag_fragment.glsl", GL_FRAGMENT_SHADER);
 
     mProgram = std::make_unique<Program>(std::move(shaders));
+
+    glFrontFace(GL_CW);
+    glEnable(GL_DEPTH_TEST);
 }
 
 Renderer::~Renderer() = default;
@@ -151,7 +154,7 @@ void Renderer::Render(const Camera& camera)
     }
 
     glClearColor(0.4f, 0.5f, 0.5f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPolygonMode(GL_FRONT_AND_BACK, config.wireframe ? GL_LINE : GL_FILL);
 
     mProgram->Use();
@@ -162,8 +165,8 @@ void Renderer::Render(const Camera& camera)
         model = glm::rotate(model, glm::radians(config.angle), axis);
     model = glm::translate(model, glm::vec3(-0.5f, -0.5f, 0.0f));
 
-    mProgram->SetMat4("viewProj", camera.GetViewProjection());
-    mProgram->SetMat4("model", model);
+    mProgram->SetMat4( "viewProj",  camera.GetViewProjection());
+    mProgram->SetMat4( "model",     model);
     mProgram->SetFloat("time",      config.xTimeOffset);
     mProgram->SetFloat("amplitude", config.amplitude);
     mProgram->SetFloat("waveCount", config.waveCount);
