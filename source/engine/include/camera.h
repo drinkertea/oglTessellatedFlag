@@ -12,18 +12,28 @@
 namespace Engine
 {
 
+//! Simple camera implementation supports movement and rotation.
+//! Owns pressed key and forward it to Config.
 class Camera : public IWindowCallback
 {
 public:
+    //! Subscribing to window events.
     Camera(Window& window, Config& config);
     ~Camera() override;
 
+    //! Should be called each frame, to handle events
     void Update();
+
+    //! Returns current view*projection matrix, should be called after Update.
     glm::mat4 GetViewProjection() const;
 
+    //! Window keyboard callback.
     void OnKeyEvent(int key, int action) override;
+
+    //! Window mouse callback.
     void OnMouseMove(double x, double y) override;
 
+    //! Returns current config.
     const Config& CurrentConfig() const;
 
 private:

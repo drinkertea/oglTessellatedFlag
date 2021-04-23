@@ -18,6 +18,7 @@ namespace Engine
 
 static constexpr size_t sStrSize = 2048;
 
+//! Simple GL shader loader
 class Shader
 {
 public:
@@ -68,9 +69,11 @@ private:
     uint32_t mID = 0;
 };
 
+//! Simgple GL program wrappper
 class Program
 {
 public:
+    //! Shaders will be deleted after linkage
     Program(std::vector<Shader>&& shaders)
     {
         mID = glCreateProgram();
@@ -78,10 +81,12 @@ public:
             glAttachShader(mID, shader.GetId());
 
         glLinkProgram(mID);
-        CheckCompileErrors();
 
-        for (const auto& shader : shaders)
-            glDeleteShader(shader.GetId());
+        std::shared_ptr<void> deleteGuard(nullptr, [&](void*){
+            for (const auto& shader : shaders)
+                glDeleteShader(shader.GetId()); 
+        });
+        CheckCompileErrors();
     }
 
     void Use()
@@ -116,9 +121,9 @@ private:
 };
 
 Geometry::Geometry(uint32_t depth)
-    : mTessellator(depth)
-    , mDepth(depth)
+    : mDepth(depth)
 {
+    Tessellator tessellator(depth);
     glGenVertexArrays(1, &mVertexArray);
     glGenBuffers(1, &mVertexBuffer);
     glGenBuffers(1, &mIndexBuffer);
@@ -128,18 +133,20 @@ Geometry::Geometry(uint32_t depth)
     glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
     glBufferData(
         GL_ARRAY_BUFFER,
-        Tessellator::sVertexSize * mTessellator.GetVertices().size(),
-        mTessellator.GetVertices().data(),
+        Tessellator::sVertexSize * tessellator.GetVertices().size(),
+        tessellator.GetVertices().data(),
         GL_STATIC_DRAW
     );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
-        sizeof(uint32_t) * mTessellator.Getindices().size(),
-        mTessellator.Getindices().data(),
+        sizeof(uint32_t) * tessellator.Getindices().size(),
+        tessellator.Getindices().data(),
         GL_STATIC_DRAW
     );
+
+    mIndexCount = static_cast<uint32_t>(tessellator.Getindices().size());
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, Tessellator::sVertexSize, (void*)0);
     glEnableVertexAttribArray(0);
@@ -155,7 +162,7 @@ Geometry::~Geometry()
 void Geometry::Use() const
 {
     glBindVertexArray(mVertexArray);
-    glDrawElements(GL_TRIANGLES, mTessellator.Getindices().size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, 0);
 }
 
 uint32_t Geometry::GetDepth() const
@@ -180,6 +187,8 @@ Renderer::~Renderer() = default;
 void Renderer::Render(const Camera& camera)
 {
     const auto& config = camera.CurrentConfig();
+
+    // Update geometry if config changed.
     if (!mGeometry || config.depth != mGeometry->GetDepth())
     {
         mGeometry = std::make_unique<Geometry>(config.depth);
@@ -187,22 +196,27 @@ void Renderer::Render(const Camera& camera)
 
     glClearColor(0.4f, 0.5f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Toggle wireframe
     glPolygonMode(GL_FRONT_AND_BACK, config.wireframe ? GL_LINE : GL_FILL);
 
     mProgram->Use();
 
+    // Apply model transformations.
     glm::mat4 model = glm::identity<glm::mat4>();
     glm::vec3 axis(config.rAxis[0], config.rAxis[1], config.rAxis[2]);
     if (axis != glm::vec3(0.0f, 0.0f, 0.0f))
         model = glm::rotate(model, glm::radians(config.angle), axis);
     model = glm::translate(model, glm::vec3(-0.5f, -0.5f, 0.0f));
 
+    // Uniforms filling.
     mProgram->SetMat4( "viewProj",  camera.GetViewProjection());
     mProgram->SetMat4( "model",     model);
     mProgram->SetFloat("time",      config.xTimeOffset);
     mProgram->SetFloat("amplitude", config.amplitude);
     mProgram->SetFloat("waveCount", config.waveCount);
 
+    // Draw
     mGeometry->Use();
 }
 

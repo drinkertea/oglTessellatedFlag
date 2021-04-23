@@ -9,6 +9,7 @@ namespace Engine
 
 bool Config::OnKeyPressed(int key, const std::set<int>& pressedKeys)
 {
+    // Spagetti keys processing
     if (key == GLFW_KEY_EQUAL || key == GLFW_KEY_MINUS)
     {
         float delta = key == GLFW_KEY_MINUS ? -1.0f : 1.0f;

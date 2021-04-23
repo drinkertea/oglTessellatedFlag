@@ -7,10 +7,14 @@
 namespace Engine
 {
 
+//! Simple CPU FPS counter.
 class Counter
 {
 public:
+    //! Should be called each frame.
     void Update();
+
+    //! Returns following string: "FPS <cnt>; AVG <cnt>;"
     const std::string& GetPresentation() const;
 
 private:

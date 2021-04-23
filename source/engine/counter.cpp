@@ -13,6 +13,7 @@ void Counter::Update()
     mPrev = curr;
 
     ++mFrameNumber;
+    // Use first two frames for initialization
     if (mFrameNumber <= 2)
     {
         if (mFrameNumber == 2)

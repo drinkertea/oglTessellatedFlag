@@ -36,6 +36,7 @@ void Tessellator::Update(uint32_t depth)
         newVerts.push_back(Vertex{ { x * 1.5, y, 0.0f } });
     };
 
+    // Only vertical split needed for flag
     for (uint32_t x = 0; x < depth + 1; ++x)
     {
         auto xf = static_cast<float>(x) * delta;

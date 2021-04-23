@@ -105,7 +105,7 @@ Camera::Camera(Window& window, Config& config)
     , mLastX(mWindow.GetWidth() / 2)
     , mLastY(mWindow.GetHeight() / 2)
 {
-    mWindow.AddCallback(*this);
+    window.AddCallback(*this);
 }
 
 Camera::~Camera()
@@ -119,6 +119,7 @@ void Camera::Update()
     mLastFrame = currentFrame;
     mConfig.xTimeOffset = static_cast<float>(mLastFrame) * mConfig.speed;
 
+    // Multiple keys can be pressed, handle all of it.
     for (auto mLastKey : mPressedKeys)
     {
         if (mLastKey == GLFW_KEY_W)
@@ -156,6 +157,7 @@ void Camera::OnKeyEvent(int key, int action)
         return;
     }
 
+    // Update config.
     if (mConfig.OnKeyPressed(key, mPressedKeys))
     {
         return;
