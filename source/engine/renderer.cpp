@@ -207,7 +207,7 @@ void Renderer::Render(const Camera& camera)
     glm::vec3 axis(config.rAxis[0], config.rAxis[1], config.rAxis[2]);
     if (axis != glm::vec3(0.0f, 0.0f, 0.0f))
         model = glm::rotate(model, glm::radians(config.angle), axis);
-    model = glm::translate(model, glm::vec3(-0.5f, -0.5f, 0.0f));
+    model = glm::translate(model, glm::vec3(-0.75f, -0.5f, 0.0f));
 
     // Uniforms filling.
     mProgram->SetMat4( "viewProj",  camera.GetViewProjection());
