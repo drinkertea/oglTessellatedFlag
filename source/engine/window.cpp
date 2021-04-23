@@ -161,7 +161,7 @@ void Window::SetTitle(const std::string& title)
 
 uint32_t Window::GetWidth() const
 {
-    return mImpl->GetHeight();
+    return mImpl->GetWidth();
 }
 
 uint32_t Window::GetHeight() const

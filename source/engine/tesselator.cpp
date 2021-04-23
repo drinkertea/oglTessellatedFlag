@@ -33,7 +33,7 @@ void Tessellator::Update(uint32_t depth)
 
     auto addVertex = [&](float x, float y)
     {
-        newVerts.push_back(Vertex{ { x, y, 0.0f }, { x, 1.f - y } });
+        newVerts.push_back(Vertex{ { x * 1.5, y, 0.0f } });
     };
 
     for (uint32_t x = 0; x < depth + 1; ++x)

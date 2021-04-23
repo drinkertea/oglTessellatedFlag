@@ -33,22 +33,6 @@ private:
     Tessellator mTessellator;
 };
 
-class Texture
-{
-public:
-    Texture(const char* path);
-    ~Texture();
-
-    void Use() const;
-
-    Texture(const Texture&) = delete;
-    Texture& operator=(const Texture&) = delete;
-
-private:
-    uint32_t    mTexture{ 0u };
-    const char* mPath = nullptr;
-};
-
 class Renderer
 {
 public:
@@ -60,7 +44,6 @@ public:
 private:
     std::unique_ptr<Program>  mProgram;
     std::unique_ptr<Geometry> mGeometry;
-    std::deque<Texture>       mTextures;
 };
 
 };

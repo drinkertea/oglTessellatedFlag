@@ -14,10 +14,9 @@ public:
     struct Vertex
     {
         glm::vec3 position;
-        glm::vec2 texCoord;
     };
     static constexpr size_t sVertexSize = sizeof(Vertex);
-    static_assert(sVertexSize == sizeof(float) * 5);
+    static_assert(sVertexSize == sizeof(float) * 3);
 
     using VertexBuffer = std::vector<Vertex>;
     using IndexBuffer  = std::vector<uint32_t>;

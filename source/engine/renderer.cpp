@@ -18,12 +18,6 @@ namespace Engine
 
 static constexpr size_t sStrSize = 2048;
 
-static const std::array<const char*, 3> gTextures = {
-     "resources/textures/algeria.png",
-     "resources/textures/merina_people.png",
-     "resources/textures/maldives.png",
-};
-
 class Shader
 {
 public:
@@ -149,8 +143,6 @@ Geometry::Geometry(uint32_t depth)
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, Tessellator::sVertexSize, (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, Tessellator::sVertexSize, (void*)(sizeof(Tessellator::Vertex::position)));
-    glEnableVertexAttribArray(1);
 }
 
 Geometry::~Geometry()
@@ -171,42 +163,6 @@ uint32_t Geometry::GetDepth() const
     return mDepth;
 }
 
-Texture::Texture(const char* path)
-    : mPath(path)
-{
-    glGenTextures(1, &mTexture);
-    glBindTexture(GL_TEXTURE_2D, mTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    uint8_t* textureData = nullptr;
-    uint32_t width = 0;
-    uint32_t height = 0;
-    lodepng_decode24_file(&textureData, &width, &height, path);
-    if (textureData)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        throw std::runtime_error("Failed to load texture, path: " + std::string(path));
-    }
-    free(textureData);
-}
-
-Texture::~Texture()
-{
-    glDeleteTextures(1, &mTexture);
-}
-
-void Texture::Use() const
-{
-    glBindTexture(GL_TEXTURE_2D, mTexture);
-}
-
 Renderer::Renderer()
 {
     std::vector<Shader> shaders;
@@ -217,11 +173,6 @@ Renderer::Renderer()
 
     glFrontFace(GL_CW);
     glEnable(GL_DEPTH_TEST);
-
-    for (const auto& texturePath : gTextures)
-    {
-        mTextures.emplace_back(texturePath);
-    }
 }
 
 Renderer::~Renderer() = default;
@@ -232,11 +183,6 @@ void Renderer::Render(const Camera& camera)
     if (!mGeometry || config.depth != mGeometry->GetDepth())
     {
         mGeometry = std::make_unique<Geometry>(config.depth);
-    }
-
-    if (config.texture >= gTextures.size())
-    {
-        throw std::runtime_error("Unexpected texture index.");
     }
 
     glClearColor(0.4f, 0.5f, 0.5f, 1.0f);
@@ -257,7 +203,6 @@ void Renderer::Render(const Camera& camera)
     mProgram->SetFloat("amplitude", config.amplitude);
     mProgram->SetFloat("waveCount", config.waveCount);
 
-    mTextures[config.texture].Use();
     mGeometry->Use();
 }
 
