@@ -1,9 +1,8 @@
 ## oglTessellatedFlag
 ### Simple OpenGL CPU tessellation sample
-![flagScreen](https://user-images.githubusercontent.com/23703391/115539615-d8785380-a2a5-11eb-8564-77933310fe61.png)  
+![NewFlag](https://user-images.githubusercontent.com/23703391/115838930-d556a200-a422-11eb-80a8-06d1476e49fc.png)
   
 ### Hotkeys
-* **`1`**, **`2`**, **`3`** - change flag texture.
 * **`ctrl + shift + w`** - toggle wireframe.
 * **`-`**, **`=`** - decrase/increase value depended on combination:
     * **`shift`** - change amplitude.
